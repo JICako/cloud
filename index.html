@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Студенческое Облако</title>
+  <title>Конкурс — Облачная Платформа</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -13,6 +13,9 @@
   --ac:#C8612A; --ac-dk:#A34E20; --ac-lt:#F2E8DF;
   --green:#3A7D5C; --green-lt:#E2F0EA;
   --red:#B84040; --red-lt:#FAE8E8;
+  --blue:#1D60C8; --blue-lt:#E3EDF9;
+  --yellow:#B07D10; --yellow-lt:#FDF3D7;
+  --purple:#6D28D9; --purple-lt:#EDE9FE;
   --sh-sm:0 1px 4px rgba(28,26,23,.07);
   --sh-md:0 4px 20px rgba(28,26,23,.10);
   --sh-lg:0 12px 40px rgba(28,26,23,.14);
@@ -26,6 +29,7 @@ html{font-size:16px}
 body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased}
 .hidden{display:none!important}
 
+/* ── Кнопки ── */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:none;border-radius:var(--rs);font-family:var(--fb);font-size:.875rem;font-weight:500;cursor:pointer;transition:var(--tr);text-decoration:none;white-space:nowrap;line-height:1}
 .btn-primary{background:var(--ac);color:#fff}
 .btn-primary:hover{background:var(--ac-dk);transform:translateY(-1px);box-shadow:var(--sh-md)}
@@ -33,13 +37,21 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .btn-ghost:hover{background:var(--inp);color:var(--tx)}
 .btn-danger{background:transparent;color:var(--red);border:1.5px solid transparent}
 .btn-danger:hover{background:var(--red-lt);border-color:var(--red)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#2d6347;transform:translateY(-1px)}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#1548a0;transform:translateY(-1px)}
 .btn:disabled{opacity:.5;pointer-events:none}
 .btn-full{width:100%;justify-content:center;padding:13px;font-size:1rem}
+.btn-sm{padding:6px 12px;font-size:.8125rem}
 
+/* ── Поля ── */
 .inp{width:100%;padding:12px 16px;background:var(--inp);border:1.5px solid transparent;border-radius:var(--rs);font-family:var(--fb);font-size:.9375rem;color:var(--tx);transition:var(--tr);outline:none}
 .inp::placeholder{color:#bbb}
 .inp:focus{background:#fff;border-color:var(--ac);box-shadow:0 0 0 3px rgba(200,97,42,.12)}
+select.inp{cursor:pointer}
 
+/* ── Toast ── */
 #toasts{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
 .toast{padding:12px 20px;border-radius:var(--rs);font-size:.875rem;font-weight:500;box-shadow:var(--sh-lg);animation:slideUp .3s ease;max-width:340px}
 .toast.ok{background:var(--green);color:#fff}
@@ -49,28 +61,35 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .spin{width:16px;height:16px;flex-shrink:0;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spinning .7s linear infinite}
 .spin.dark{border-color:rgba(28,26,23,.15);border-top-color:var(--ac)}
 
+/* ── Бейджи статусов ── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:.75rem;font-weight:600;white-space:nowrap}
+.badge-pending{background:var(--yellow-lt);color:var(--yellow)}
+.badge-accepted{background:var(--green-lt);color:var(--green)}
+.badge-rejected{background:var(--red-lt);color:var(--red)}
+
 @keyframes spinning{to{transform:rotate(360deg)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes cardIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes shimmer{to{background-position:-200% 0}}
 
-/* ══ AUTH ══ */
+/* ════════ AUTH PAGE ════════ */
 #auth-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
 .auth-panel{background:var(--tx);padding:60px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
 .auth-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(200,97,42,.25) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(200,97,42,.12) 0%,transparent 50%)}
 .panel-dots{position:absolute;bottom:-40px;right:-40px;width:200px;height:200px;background-image:radial-gradient(circle,rgba(255,255,255,.09) 1.5px,transparent 1.5px);background-size:20px 20px}
 .panel-logo{position:relative;z-index:1}
-.panel-logo .logo-box{width:48px;height:48px;background:var(--ac);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
-.panel-logo h1{font-family:var(--fh);font-size:1.625rem;color:#fff;line-height:1.2}
-.panel-logo p{color:rgba(255,255,255,.5);font-size:.875rem;margin-top:8px}
-.panel-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:7px 14px;font-size:.8125rem;color:rgba(255,255,255,.75);margin-top:14px}
-.panel-badge span{width:8px;height:8px;background:#4ade80;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px #4ade80}
+.logo-box{width:52px;height:52px;background:var(--ac);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
+.panel-logo h1{font-family:var(--fh);font-size:1.75rem;color:#fff;line-height:1.2}
+.panel-logo p{color:rgba(255,255,255,.5);font-size:.9375rem;margin-top:10px;line-height:1.6}
+.panel-features{display:flex;flex-direction:column;gap:10px;margin-top:20px;position:relative;z-index:1}
+.panel-feature{display:flex;align-items:center;gap:10px;font-size:.875rem;color:rgba(255,255,255,.7)}
+.panel-feature span:first-child{font-size:1rem}
 .panel-quote{position:relative;z-index:1}
-.panel-quote blockquote{font-family:var(--fh);font-style:italic;font-size:1.0625rem;color:rgba(255,255,255,.82);line-height:1.7;border-left:3px solid var(--ac);padding-left:18px}
-.panel-quote cite{display:block;margin-top:10px;font-size:.8125rem;color:rgba(255,255,255,.38);font-style:normal}
-.auth-side{display:flex;align-items:center;justify-content:center;padding:60px 40px}
-.auth-box{width:100%;max-width:400px}
+.panel-quote blockquote{font-family:var(--fh);font-style:italic;font-size:1rem;color:rgba(255,255,255,.8);line-height:1.7;border-left:3px solid var(--ac);padding-left:18px}
+.panel-quote cite{display:block;margin-top:8px;font-size:.8125rem;color:rgba(255,255,255,.35);font-style:normal}
+.auth-side{display:flex;align-items:center;justify-content:center;padding:60px 40px;background:var(--bg)}
+.auth-box{width:100%;max-width:420px}
 .auth-box h2{font-family:var(--fh);font-size:1.875rem;margin-bottom:6px}
 .auth-sub{color:var(--soft);font-size:.9375rem;margin-bottom:32px}
 .auth-tabs{display:flex;gap:4px;background:var(--inp);padding:4px;border-radius:var(--rs);margin-bottom:28px}
@@ -84,124 +103,182 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 .msg.ok{background:var(--green-lt);color:var(--green);border:1px solid rgba(58,125,92,.2)}
 @media(max-width:720px){#auth-page{grid-template-columns:1fr}.auth-panel{display:none}.auth-side{padding:40px 20px}}
 
-/* ══ DASHBOARD ══ */
-#dash-page{display:flex;flex-direction:column;min-height:100vh}
+/* ════════ NAVBAR ════════ */
 .navbar{height:64px;background:var(--card);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm)}
 .nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
 .nav-logo-icon{width:36px;height:36px;background:var(--ac);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
 .nav-logo-text{font-family:var(--fh);font-size:1.125rem;font-weight:600;color:var(--tx)}
 .nav-space{flex:1}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:600;color:#fff;border:2px solid var(--bdr)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:700;color:#fff}
 .nav-name{font-size:.875rem;color:var(--soft);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-chip{display:inline-flex;align-items:center;gap:5px;background:var(--purple-lt);color:var(--purple);border-radius:99px;padding:4px 10px;font-size:.75rem;font-weight:600}
 
-.main{flex:1;max-width:1160px;width:100%;margin:0 auto;padding:40px 32px 60px}
-.page-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap}
-.page-hdr h2{font-family:var(--fh);font-size:1.875rem;line-height:1.2}
+/* ════════ USER DASHBOARD ════════ */
+#user-page{display:flex;flex-direction:column;min-height:100vh}
+.main{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:40px 32px 60px}
+
+.page-hdr{margin-bottom:28px}
+.page-hdr h2{font-family:var(--fh);font-size:1.75rem;line-height:1.2}
 .page-hdr p{color:var(--soft);font-size:.9375rem;margin-top:5px}
 
-.stats{display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap}
-.stat{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 24px;flex:1;min-width:130px;animation:fadeIn .4s ease both}
-.stat:nth-child(2){animation-delay:.06s}
-.stat:nth-child(3){animation-delay:.12s}
-.stat:nth-child(4){animation-delay:.18s}
-.stat-val{font-size:1.75rem;font-weight:600;font-family:var(--fh);line-height:1}
-.stat-lbl{font-size:.8125rem;color:var(--soft);margin-top:5px;text-transform:uppercase;letter-spacing:.04em}
+.user-stats{display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+.ustat{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;flex:1;min-width:120px;animation:fadeIn .4s ease both}
+.ustat:nth-child(2){animation-delay:.06s}
+.ustat:nth-child(3){animation-delay:.12s}
+.ustat-val{font-size:1.5rem;font-weight:600;font-family:var(--fh);line-height:1}
+.ustat-lbl{font-size:.8125rem;color:var(--soft);margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
 
-.drop-zone{background:var(--card);border:2px dashed var(--bdr);border-radius:var(--r);padding:36px;text-align:center;cursor:pointer;transition:var(--tr);margin-bottom:28px;position:relative;overflow:hidden}
+.drop-zone{background:var(--card);border:2px dashed var(--bdr);border-radius:var(--r);padding:36px;text-align:center;cursor:pointer;transition:var(--tr);margin-bottom:24px;position:relative;overflow:hidden}
 .drop-zone:hover,.drop-zone.over{border-color:var(--ac);background:var(--ac-lt)}
 .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
 .drop-icon{font-size:2.25rem;display:block;margin-bottom:10px}
 .drop-zone h3{font-family:var(--fh);font-size:1.0625rem;margin-bottom:5px}
 .drop-zone p{font-size:.875rem;color:var(--soft)}
 
-.prog-panel{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:20px 24px;margin-bottom:24px;display:none}
+.prog-panel{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 22px;margin-bottom:20px;display:none}
 .prog-panel.show{display:block;animation:slideUp .25s ease}
-.prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .prog-name{font-size:.9375rem;font-weight:500;display:flex;align-items:center;gap:8px}
 .prog-pct{font-size:.875rem;color:var(--soft);font-weight:600}
 .prog-track{height:6px;background:var(--inp);border-radius:99px;overflow:hidden}
 .prog-bar{height:100%;background:linear-gradient(90deg,var(--ac),#E8843A);border-radius:99px;transition:width .2s ease;width:0%}
 
-.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-.search-wrap{position:relative;flex:1;min-width:200px}
-.search-wrap .inp{padding-left:38px}
-.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--soft);pointer-events:none}
-.filter-tabs{display:flex;gap:4px;background:var(--inp);padding:4px;border-radius:var(--rs)}
-.ftab{padding:7px 14px;font-size:.8125rem;font-weight:500;border-radius:6px;cursor:pointer;transition:var(--tr);color:var(--soft);user-select:none;white-space:nowrap}
-.ftab.active{background:#fff;color:var(--tx);box-shadow:var(--sh-sm)}
-
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.sec-title{font-family:var(--fh);font-size:1.1875rem;font-weight:600}
+.sec-title{font-family:var(--fh);font-size:1.125rem;font-weight:600}
 .sec-count{font-size:.8125rem;color:var(--soft);background:var(--inp);padding:3px 10px;border-radius:99px}
 
-.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+/* Файловые карточки (пользователь) */
+.files-list{display:flex;flex-direction:column;gap:12px}
+.file-row{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:16px;transition:var(--tr);animation:cardIn .3s ease both}
+.file-row:hover{box-shadow:var(--sh-md);border-color:#d5cfc7}
+.file-row-ico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.file-row-ico.pdf{background:#FEE8E3}
+.file-row-ico.docx{background:#E3EDF9}
+.file-row-ico.img{background:#E3F9EE}
+.file-row-ico.file{background:var(--inp)}
+.file-row-info{flex:1;min-width:0}
+.file-row-name{font-weight:500;font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-row-meta{font-size:.8125rem;color:var(--soft);margin-top:3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.file-row-actions{display:flex;gap:6px;flex-shrink:0}
 
-.file-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;transition:var(--tr);animation:cardIn .35s ease both;position:relative;overflow:hidden}
-.file-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--ac);transform:scaleY(0);transform-origin:bottom;transition:transform .22s ease}
-.file-card:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
-.file-card:hover::before{transform:scaleY(1)}
-.file-card.mine::before{background:var(--green)}
-.file-card.mine{border-color:#c8e6d8}
+/* Комментарий от администратора */
+.admin-comment{margin-top:10px;padding:10px 14px;background:var(--yellow-lt);border-left:3px solid var(--yellow);border-radius:0 var(--rs) var(--rs) 0;font-size:.8125rem;color:var(--yellow)}
+.admin-comment strong{display:block;margin-bottom:2px;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
 
-.card-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
-.file-ico{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.file-ico.pdf{background:#FEE8E3}
-.file-ico.docx{background:#E3EDF9}
-.file-ico.img{background:#E3F9EE}
-.file-ico.file{background:var(--inp)}
-.card-info{flex:1;min-width:0}
-.card-name{font-weight:500;font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
-.card-meta{font-size:.8125rem;color:var(--soft);margin-top:3px}
-
-.card-author{display:flex;align-items:center;gap:9px;padding:10px 0;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);margin-bottom:12px}
-.a-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
-.a-name{font-size:.8125rem;color:var(--tx);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mine-tag{margin-left:auto;font-size:.75rem;background:var(--green-lt);color:var(--green);padding:2px 9px;border-radius:99px;font-weight:500;white-space:nowrap;flex-shrink:0}
-
-.card-actions{display:flex;gap:6px}
-.card-actions .btn{flex:1;justify-content:center;font-size:.8125rem;padding:8px 6px}
-
-.empty{text-align:center;padding:60px 40px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);grid-column:1/-1}
-.empty span{font-size:3rem;display:block;margin-bottom:14px;opacity:.45}
-.empty h3{font-family:var(--fh);font-size:1.25rem;margin-bottom:7px}
-.empty p{color:var(--soft);font-size:.9375rem}
+.empty-state{text-align:center;padding:50px 30px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r)}
+.empty-state .ei{font-size:2.75rem;display:block;margin-bottom:12px;opacity:.4}
+.empty-state h3{font-family:var(--fh);font-size:1.2rem;margin-bottom:6px}
+.empty-state p{color:var(--soft);font-size:.9rem}
 
 .skel{background:linear-gradient(90deg,var(--inp) 25%,#e8e4de 50%,var(--inp) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}
 
+/* ════════ ADMIN DASHBOARD ════════ */
+#admin-page{display:flex;flex-direction:column;min-height:100vh}
+.admin-main{flex:1;max-width:1280px;width:100%;margin:0 auto;padding:36px 32px 60px}
+
+/* Admin tabs */
+.admin-tabs{display:flex;gap:4px;background:var(--inp);padding:4px;border-radius:var(--rs);margin-bottom:28px;width:fit-content}
+.atab{padding:9px 20px;font-size:.875rem;font-weight:500;border-radius:6px;cursor:pointer;transition:var(--tr);color:var(--soft);user-select:none;display:flex;align-items:center;gap:7px}
+.atab.active{background:#fff;color:var(--tx);box-shadow:var(--sh-sm)}
+.atab-badge{background:var(--ac);color:#fff;border-radius:99px;padding:1px 7px;font-size:.7rem;font-weight:700}
+
+/* Admin stats */
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.astat{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:20px 24px;animation:fadeIn .4s ease both;position:relative;overflow:hidden}
+.astat::after{content:attr(data-icon);position:absolute;right:16px;top:16px;font-size:1.75rem;opacity:.15}
+.astat:nth-child(2){animation-delay:.06s}
+.astat:nth-child(3){animation-delay:.12s}
+.astat:nth-child(4){animation-delay:.18s}
+.astat-val{font-size:2rem;font-weight:700;font-family:var(--fh);line-height:1}
+.astat-lbl{font-size:.8125rem;color:var(--soft);margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
+
+/* Toolbar */
+.admin-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:340px}
+.search-wrap .inp{padding-left:38px}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--soft);pointer-events:none;font-size:.875rem}
+
+/* Participants table */
+.participants-table{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.pt-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:0;background:var(--bg);border-bottom:1px solid var(--bdr)}
+.pt-col{padding:12px 16px;font-size:.75rem;font-weight:600;color:var(--soft);text-transform:uppercase;letter-spacing:.05em}
+.pt-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:0;border-bottom:1px solid var(--bdr);transition:var(--tr);animation:fadeIn .3s ease both}
+.pt-row:last-child{border-bottom:none}
+.pt-row:hover{background:#faf9f7}
+.pt-cell{padding:14px 16px;font-size:.9rem;display:flex;align-items:center;gap:8px}
+.participant-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+.participant-name{font-weight:500}
+.participant-email{font-size:.8125rem;color:var(--soft)}
+
+/* Admin files table */
+.admin-files{display:flex;flex-direction:column;gap:10px}
+.admin-file-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;animation:cardIn .3s ease both;transition:var(--tr)}
+.admin-file-card:hover{box-shadow:var(--sh-sm);border-color:#d5cfc7}
+.afc-top{display:flex;align-items:flex-start;gap:14px}
+.afc-ico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.afc-ico.pdf{background:#FEE8E3}
+.afc-ico.docx{background:#E3EDF9}
+.afc-ico.img{background:#E3F9EE}
+.afc-ico.file{background:var(--inp)}
+.afc-info{flex:1;min-width:0}
+.afc-name{font-weight:500;font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.afc-meta{font-size:.8125rem;color:var(--soft);margin-top:3px}
+.afc-author{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)}
+.afc-author-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff}
+.afc-author-name{font-size:.8125rem;color:var(--soft)}
+.afc-controls{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr);flex-wrap:wrap}
+.afc-status-sel{padding:6px 10px;border-radius:var(--rs);border:1.5px solid var(--bdr);font-family:var(--fb);font-size:.8125rem;background:#fff;cursor:pointer;color:var(--tx);outline:none}
+.afc-status-sel:focus{border-color:var(--ac)}
+.afc-comment-inp{flex:1;min-width:180px;padding:7px 12px;border-radius:var(--rs);border:1.5px solid var(--bdr);font-family:var(--fb);font-size:.8125rem;outline:none;color:var(--tx)}
+.afc-comment-inp:focus{border-color:var(--ac)}
+
+/* Export btn */
+.export-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--green-lt);color:var(--green);border:1.5px solid rgba(58,125,92,.3);border-radius:var(--rs);font-size:.875rem;font-weight:500;cursor:pointer;transition:var(--tr)}
+.export-btn:hover{background:var(--green);color:#fff}
+
+@media(max-width:900px){
+  .admin-stats{grid-template-columns:1fr 1fr}
+  .pt-header,.pt-row{grid-template-columns:1fr 1fr 80px}
+  .pt-col:nth-child(2),.pt-cell:nth-child(2),
+  .pt-col:nth-child(4),.pt-cell:nth-child(4){display:none}
+}
 @media(max-width:768px){
   .navbar{padding:0 16px}.nav-name{display:none}
-  .main{padding:24px 16px 48px}
-  .page-hdr{flex-direction:column;align-items:flex-start}
-  .files-grid{grid-template-columns:1fr}
-  .toolbar{flex-direction:column;align-items:stretch}
+  .main,.admin-main{padding:24px 16px 48px}
+  .admin-stats{grid-template-columns:1fr 1fr}
+  .admin-toolbar{flex-direction:column;align-items:stretch}
+  .search-wrap{max-width:100%}
 }
 </style>
 </head>
 <body>
 
-<!-- ══ AUTH ══════════════════════════════════════════════════ -->
+<!-- ════════ AUTH ════════════════════════════════════════════ -->
 <div id="auth-page">
   <div class="auth-panel">
     <div class="panel-dots"></div>
     <div class="panel-logo">
-      <div class="logo-box">☁️</div>
-      <h1>Студенческое<br>Облако</h1>
-      <p>Общее хранилище для всей группы</p>
-      <div class="panel-badge">
-        <span></span> Общий доступ для всех студентов
+      <div class="logo-box">🏆</div>
+      <h1>Конкурсная<br>Платформа</h1>
+      <p>Загружайте задания и отслеживайте статус проверки</p>
+      <div class="panel-features">
+        <div class="panel-feature"><span>📁</span><span>Загрузка файлов заданий</span></div>
+        <div class="panel-feature"><span>✅</span><span>Статус проверки в реальном времени</span></div>
+        <div class="panel-feature"><span>💬</span><span>Комментарии от администрации</span></div>
+        <div class="panel-feature"><span>🔒</span><span>Только ваши файлы видны вам</span></div>
       </div>
     </div>
     <div class="panel-quote">
-      <blockquote>Знание — единственное богатство, которое умножается, когда им делишься.</blockquote>
-      <cite>— Народная мудрость</cite>
+      <blockquote>Победа — это результат подготовки, труда и умения учиться на неудачах.</blockquote>
+      <cite>— Колин Пауэлл</cite>
     </div>
   </div>
 
   <div class="auth-side">
     <div class="auth-box">
       <h2>Добро пожаловать</h2>
-      <p class="auth-sub">Войдите или создайте аккаунт</p>
+      <p class="auth-sub">Зарегистрируйтесь или войдите в аккаунт</p>
       <div class="auth-tabs">
         <div class="auth-tab active" id="tab-login">Войти</div>
         <div class="auth-tab" id="tab-reg">Регистрация</div>
@@ -212,7 +289,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
       <div id="login-form">
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" id="l-email" class="inp" placeholder="student@uni.ru">
+          <input type="email" id="l-email" class="inp" placeholder="your@email.com">
         </div>
         <div class="form-group">
           <label class="form-label">Пароль</label>
@@ -223,12 +300,12 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 
       <div id="reg-form" class="hidden">
         <div class="form-group">
-          <label class="form-label">Ваше имя (будет видно всем)</label>
-          <input type="text" id="r-name" class="inp" placeholder="Иван Иванов">
+          <label class="form-label">Полное имя участника</label>
+          <input type="text" id="r-name" class="inp" placeholder="Иванов Иван Иванович">
         </div>
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" id="r-email" class="inp" placeholder="student@uni.ru">
+          <input type="email" id="r-email" class="inp" placeholder="your@email.com">
         </div>
         <div class="form-group">
           <label class="form-label">Пароль</label>
@@ -238,81 +315,136 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
           <label class="form-label">Подтвердите пароль</label>
           <input type="password" id="r-pass2" class="inp" placeholder="Повторите пароль">
         </div>
-        <button id="reg-btn" class="btn btn-primary btn-full">Создать аккаунт</button>
+        <button id="reg-btn" class="btn btn-primary btn-full">Зарегистрироваться</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ DASHBOARD ═════════════════════════════════════════════ -->
-<div id="dash-page" class="hidden">
+<!-- ════════ USER DASHBOARD ════════════════════════════════════ -->
+<div id="user-page" class="hidden">
   <nav class="navbar">
     <a href="#" class="nav-logo">
-      <div class="nav-logo-icon">☁️</div>
-      <span class="nav-logo-text">Студенческое Облако</span>
+      <div class="nav-logo-icon">🏆</div>
+      <span class="nav-logo-text">Конкурсная Платформа</span>
     </a>
     <div class="nav-space"></div>
     <div class="nav-right">
-      <div class="nav-avatar" id="nav-avatar">?</div>
-      <span class="nav-name" id="nav-name"></span>
-      <button class="btn btn-ghost" id="logout-btn">⏻ Выйти</button>
+      <div class="nav-avatar" id="u-avatar">?</div>
+      <span class="nav-name" id="u-name"></span>
+      <button class="btn btn-ghost" id="u-logout">⏻ Выйти</button>
     </div>
   </nav>
-
   <main class="main">
     <div class="page-hdr">
-      <div>
-        <h2>Общее облако</h2>
-        <p>Все файлы студентов — в одном месте</p>
-      </div>
+      <h2 id="u-welcome">Мои задания</h2>
+      <p>Загружайте файлы и отслеживайте статус проверки</p>
     </div>
 
-    <div class="stats">
-      <div class="stat"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Всего файлов</div></div>
-      <div class="stat"><div class="stat-val" id="stat-users">—</div><div class="stat-lbl">Участников</div></div>
-      <div class="stat"><div class="stat-val" id="stat-mine">—</div><div class="stat-lbl">Моих файлов</div></div>
-      <div class="stat"><div class="stat-val" id="stat-size">—</div><div class="stat-lbl">Общий размер</div></div>
+    <div class="user-stats">
+      <div class="ustat"><div class="ustat-val" id="us-total">—</div><div class="ustat-lbl">Загружено</div></div>
+      <div class="ustat"><div class="ustat-val" id="us-pending">—</div><div class="ustat-lbl">На рассмотрении</div></div>
+      <div class="ustat"><div class="ustat-val" id="us-accepted">—</div><div class="ustat-lbl">Принято</div></div>
     </div>
 
     <div class="drop-zone" id="drop-zone">
       <input type="file" id="file-input" accept=".pdf,.docx,.jpg,.jpeg,.png" multiple>
       <span class="drop-icon">📤</span>
-      <h3>Поделись файлом с группой</h3>
+      <h3>Загрузить задание</h3>
       <p>PDF, DOCX, JPG, PNG · Максимум 50 МБ</p>
     </div>
 
     <div class="prog-panel" id="prog-panel">
       <div class="prog-hdr">
-        <div class="prog-name">
-          <span class="spin dark" style="width:14px;height:14px;border-width:2px"></span>
-          <span id="prog-name">Загрузка...</span>
-        </div>
+        <div class="prog-name"><span class="spin dark" style="width:14px;height:14px;border-width:2px"></span><span id="prog-name">Загрузка...</span></div>
         <span class="prog-pct" id="prog-pct">0%</span>
       </div>
       <div class="prog-track"><div class="prog-bar" id="prog-bar"></div></div>
     </div>
 
     <div class="sec-hdr">
-      <div class="sec-title">Все файлы</div>
-      <span class="sec-count" id="files-count">0</span>
+      <div class="sec-title">Загруженные файлы</div>
+      <span class="sec-count" id="u-count">0</span>
+    </div>
+    <div class="files-list" id="user-files">
+      <div class="file-row"><div class="skel" style="width:42px;height:42px;border-radius:10px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:15px;margin-bottom:7px;width:60%"></div><div class="skel" style="height:12px;width:40%"></div></div></div>
+      <div class="file-row"><div class="skel" style="width:42px;height:42px;border-radius:10px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:15px;margin-bottom:7px;width:75%"></div><div class="skel" style="height:12px;width:35%"></div></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ════════ ADMIN DASHBOARD ══════════════════════════════════ -->
+<div id="admin-page" class="hidden">
+  <nav class="navbar">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">🏆</div>
+      <span class="nav-logo-text">Конкурсная Платформа</span>
+    </a>
+    <div class="nav-space"></div>
+    <div class="nav-right">
+      <span class="admin-chip">⚙️ Администратор</span>
+      <div class="nav-avatar" style="background:#6D28D9">А</div>
+      <button class="btn btn-ghost" id="a-logout">⏻ Выйти</button>
+    </div>
+  </nav>
+
+  <main class="admin-main">
+    <div class="page-hdr" style="margin-bottom:24px">
+      <h2>Панель администратора</h2>
+      <p>Управляйте участниками и их заданиями</p>
     </div>
 
-    <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-ico">🔍</span>
-        <input type="text" id="search" class="inp" placeholder="Поиск по имени или автору...">
+    <div class="admin-stats">
+      <div class="astat" data-icon="👥"><div class="astat-val" id="a-stat-users">—</div><div class="astat-lbl">Участников</div></div>
+      <div class="astat" data-icon="📁"><div class="astat-val" id="a-stat-files">—</div><div class="astat-lbl">Всего файлов</div></div>
+      <div class="astat" data-icon="⏳"><div class="astat-val" id="a-stat-pending">—</div><div class="astat-lbl">На рассмотрении</div></div>
+      <div class="astat" data-icon="✅"><div class="astat-val" id="a-stat-accepted">—</div><div class="astat-lbl">Принято</div></div>
+    </div>
+
+    <div class="admin-tabs">
+      <div class="atab active" data-tab="files">📁 Все задания <span class="atab-badge" id="ab-files">0</span></div>
+      <div class="atab" data-tab="users">👥 Участники <span class="atab-badge" id="ab-users">0</span></div>
+    </div>
+
+    <!-- Задания -->
+    <div id="admin-tab-files">
+      <div class="admin-toolbar">
+        <div class="search-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text" id="a-search-files" class="inp" placeholder="Поиск по файлу или участнику...">
+        </div>
+        <select id="a-filter-status" class="inp" style="max-width:200px">
+          <option value="all">Все статусы</option>
+          <option value="pending">На рассмотрении</option>
+          <option value="accepted">Принято</option>
+          <option value="rejected">Отклонено</option>
+        </select>
       </div>
-      <div class="filter-tabs">
-        <div class="ftab active" data-f="all">Все</div>
-        <div class="ftab" data-f="mine">Мои</div>
-        <div class="ftab" data-f="others">Чужие</div>
+      <div class="admin-files" id="admin-files-list">
+        <div class="admin-file-card"><div class="skel" style="height:80px"></div></div>
+        <div class="admin-file-card"><div class="skel" style="height:80px"></div></div>
       </div>
     </div>
 
-    <div class="files-grid" id="files-grid">
-      <div class="file-card"><div class="card-top"><div class="skel" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:15px;margin-bottom:8px;width:75%"></div><div class="skel" style="height:12px;width:50%"></div></div></div><div class="skel" style="height:26px;margin:12px 0"></div><div class="skel" style="height:34px"></div></div>
-      <div class="file-card"><div class="card-top"><div class="skel" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:15px;margin-bottom:8px;width:85%"></div><div class="skel" style="height:12px;width:45%"></div></div></div><div class="skel" style="height:26px;margin:12px 0"></div><div class="skel" style="height:34px"></div></div>
-      <div class="file-card"><div class="card-top"><div class="skel" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"></div><div style="flex:1"><div class="skel" style="height:15px;margin-bottom:8px;width:60%"></div><div class="skel" style="height:12px;width:55%"></div></div></div><div class="skel" style="height:26px;margin:12px 0"></div><div class="skel" style="height:34px"></div></div>
+    <!-- Участники -->
+    <div id="admin-tab-users" class="hidden">
+      <div class="admin-toolbar">
+        <div class="search-wrap">
+          <span class="search-ico">🔍</span>
+          <input type="text" id="a-search-users" class="inp" placeholder="Поиск по имени или email...">
+        </div>
+        <button class="export-btn" id="export-btn">⬇ Экспорт CSV</button>
+      </div>
+      <div class="participants-table">
+        <div class="pt-header">
+          <div class="pt-col">Участник</div>
+          <div class="pt-col">Email</div>
+          <div class="pt-col">Файлов</div>
+          <div class="pt-col">Принято</div>
+          <div class="pt-col">Статус</div>
+        </div>
+        <div id="participants-list"></div>
+      </div>
     </div>
   </main>
 </div>
@@ -320,22 +452,40 @@ body{font-family:var(--fb);background:var(--bg);color:var(--tx);min-height:100vh
 <div id="toasts"></div>
 
 <script>
+// ══════════════════════════════════════════════════════════════
+//  КОНФИГ
+// ══════════════════════════════════════════════════════════════
 const SUPABASE_URL      = 'https://vzaygxfzdmcipdmqslfv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6YXlneGZ6ZG1jaXBkbXFzbGZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMzQzNzAsImV4cCI6MjA5MDYxMDM3MH0.GBJxpSSF7xs0mhEZ5ISmB9I4dmDaBPR4BFx4E1S29Bw';
+
+// ⚠️ ДАННЫЕ АДМИНИСТРАТОРА — поменяй на свои!
+const ADMIN_EMAIL    = 'admin@konkurs.ru';
+const ADMIN_PASSWORD = 'Admin123!';
+
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const COLORS = ['#E84393','#7C3AED','#0891B2','#059669','#D97706','#DC2626','#0284C7','#9333EA'];
+const COLORS = ['#E84393','#7C3AED','#0891B2','#059669','#D97706','#DC2626','#0284C7','#9333EA','#B45309','#0F766E'];
 const aColor = s => { let h=0; for(let c of s) h=c.charCodeAt(0)+((h<<5)-h); return COLORS[Math.abs(h)%COLORS.length]; };
 
-let me = null, allFiles = [], activeF = 'all', q = '';
+let me = null;
+let allFilesAdmin = [];
+let allUsersAdmin = [];
 
-// ── Инит ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  ИНИТ
+// ══════════════════════════════════════════════════════════════
 (async () => {
   const { data: { user } } = await sb.auth.getUser();
-  if (user) { me = user; showDash(); }
+  if (user) {
+    me = user;
+    if (me.email === ADMIN_EMAIL) showAdmin();
+    else showUser();
+  }
 })();
 
-// ── Табы ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  AUTH ТАБЫ
+// ══════════════════════════════════════════════════════════════
 document.getElementById('tab-login').addEventListener('click', () => {
   document.getElementById('tab-login').classList.add('active');
   document.getElementById('tab-reg').classList.remove('active');
@@ -351,7 +501,9 @@ document.getElementById('tab-reg').addEventListener('click', () => {
   clearMsgs();
 });
 
-// ── Вход ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  ВХОД
+// ══════════════════════════════════════════════════════════════
 document.getElementById('login-btn').addEventListener('click', async () => {
   const email = document.getElementById('l-email').value.trim();
   const pass  = document.getElementById('l-pass').value;
@@ -359,11 +511,15 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   clearMsgs(); setBtn('login-btn', true, 'Входим...');
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (error) { showErr(xlate(error.message)); setBtn('login-btn', false, 'Войти'); return; }
-  me = data.user; showDash();
+  me = data.user;
+  if (me.email === ADMIN_EMAIL) showAdmin();
+  else showUser();
 });
 document.getElementById('l-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-btn').click(); });
 
-// ── Регистрация ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  РЕГИСТРАЦИЯ
+// ══════════════════════════════════════════════════════════════
 document.getElementById('reg-btn').addEventListener('click', async () => {
   const name  = document.getElementById('r-name').value.trim();
   const email = document.getElementById('r-email').value.trim();
@@ -372,170 +528,389 @@ document.getElementById('reg-btn').addEventListener('click', async () => {
   if (!name||!email||!pass||!pass2) return showErr('Заполните все поля');
   if (pass!==pass2) return showErr('Пароли не совпадают');
   if (pass.length<6) return showErr('Пароль минимум 6 символов');
-  clearMsgs(); setBtn('reg-btn', true, 'Создаём...');
+  if (email===ADMIN_EMAIL) return showErr('Этот email зарезервирован');
+  clearMsgs(); setBtn('reg-btn', true, 'Регистрируем...');
   const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
-  setBtn('reg-btn', false, 'Создать аккаунт');
+  setBtn('reg-btn', false, 'Зарегистрироваться');
   if (error) return showErr(xlate(error.message));
-  showOk('✅ Аккаунт создан! Проверьте почту, затем войдите.');
+  showOk('✅ Аккаунт создан! Проверьте почту для подтверждения, затем войдите.');
 });
 
-// ── Дашборд ────────────────────────────────────────────────────
-function showDash() {
+// ══════════════════════════════════════════════════════════════
+//  ПОЛЬЗОВАТЕЛЬ — ДАШБОРД
+// ══════════════════════════════════════════════════════════════
+function showUser() {
   document.getElementById('auth-page').classList.add('hidden');
-  document.getElementById('dash-page').classList.remove('hidden');
+  document.getElementById('user-page').classList.remove('hidden');
   const name = me.user_metadata?.full_name || me.email;
-  document.getElementById('nav-name').textContent  = name;
-  document.getElementById('nav-avatar').textContent = name[0].toUpperCase();
-  document.getElementById('nav-avatar').style.background = aColor(me.id);
-  loadFiles(); setupUpload(); setupSearch(); setupFilters();
+  document.getElementById('u-name').textContent = name;
+  document.getElementById('u-welcome').textContent = `Привет, ${name.split(' ')[0]}!`;
+  const av = document.getElementById('u-avatar');
+  av.textContent = name[0].toUpperCase();
+  av.style.background = aColor(me.id);
+  loadUserFiles();
+  setupUpload();
 }
 
-// ── Загрузка ВСЕХ файлов ───────────────────────────────────────
-async function loadFiles() {
+async function loadUserFiles() {
   try {
-    const { data, error } = await sb.from('files').select('*').order('created_at', { ascending: false });
+    // Пользователь видит ТОЛЬКО свои файлы
+    const { data, error } = await sb.from('files')
+      .select('*')
+      .eq('user_id', me.id)
+      .order('created_at', { ascending: false });
     if (error) throw error;
-    allFiles = data || [];
-    applyFilters(); updateStats();
+    renderUserFiles(data || []);
+    updateUserStats(data || []);
   } catch(e) {
-    toast('Ошибка: ' + e.message, 'err');
-    document.getElementById('files-grid').innerHTML = '';
+    toast('Ошибка загрузки: ' + e.message, 'err');
   }
 }
 
-// ── Фильтрация ────────────────────────────────────────────────
-function applyFilters() {
-  let list = allFiles;
-  if (activeF === 'mine')   list = list.filter(f => f.user_id === me.id);
-  if (activeF === 'others') list = list.filter(f => f.user_id !== me.id);
-  if (q) list = list.filter(f =>
-    f.file_name.toLowerCase().includes(q) ||
-    (f.uploader_name||'').toLowerCase().includes(q)
-  );
-  renderFiles(list);
-  document.getElementById('files-count').textContent = list.length;
-}
-
-// ── Рендер ────────────────────────────────────────────────────
-function renderFiles(files) {
-  const grid = document.getElementById('files-grid');
+function renderUserFiles(files) {
+  const list = document.getElementById('user-files');
+  document.getElementById('u-count').textContent = files.length;
   if (!files.length) {
-    grid.innerHTML = `<div class="empty"><span>📭</span><h3>Файлов не найдено</h3><p>Попробуй другой фильтр или загрузи первый файл!</p></div>`;
+    list.innerHTML = `<div class="empty-state"><span class="ei">📭</span><h3>Заданий пока нет</h3><p>Загрузите ваше первое задание выше</p></div>`;
     return;
   }
-  grid.innerHTML = files.map((f, i) => {
-    const mine   = f.user_id === me.id;
-    const author = f.uploader_name || f.uploader_email || 'Студент';
-    const color  = aColor(f.user_id);
+  list.innerHTML = files.map((f, i) => {
+    const statusBadge = statusHtml(f.status || 'pending');
+    const commentHtml = f.admin_comment
+      ? `<div class="admin-comment"><strong>💬 Комментарий администратора</strong>${esc(f.admin_comment)}</div>`
+      : '';
     return `
-    <div class="file-card${mine?' mine':''}" style="animation-delay:${i*.05}s">
-      <div class="card-top">
-        <div class="file-ico ${icoClass(f.file_type)}">${icoEmoji(f.file_type)}</div>
-        <div class="card-info">
-          <div class="card-name" title="${esc(f.file_name)}">${esc(f.file_name)}</div>
-          <div class="card-meta">${fmtSize(f.file_size)} · ${fmtDate(f.created_at)}</div>
+    <div class="file-row" style="flex-direction:column;align-items:stretch;animation-delay:${i*.05}s">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="file-row-ico ${icoClass(f.file_type)}">${icoEmoji(f.file_type)}</div>
+        <div class="file-row-info">
+          <div class="file-row-name">${esc(f.file_name)}</div>
+          <div class="file-row-meta">
+            <span>${fmtSize(f.file_size)}</span>
+            <span>·</span>
+            <span>${fmtDate(f.created_at)}</span>
+            <span>·</span>
+            ${statusBadge}
+          </div>
+        </div>
+        <div class="file-row-actions">
+          <a href="${f.file_url}" target="_blank" class="btn btn-ghost btn-sm">👁</a>
+          <a href="${f.file_url}" download="${esc(f.file_name)}" class="btn btn-ghost btn-sm">⬇</a>
+          <button class="btn btn-danger btn-sm" onclick="deleteUserFile('${f.id}','${esc(f.storage_path||'')}')">🗑</button>
         </div>
       </div>
-      <div class="card-author">
-        <div class="a-avatar" style="background:${color}">${author[0].toUpperCase()}</div>
-        <div class="a-name">${esc(author)}</div>
-        ${mine ? '<span class="mine-tag">Мой файл</span>' : ''}
-      </div>
-      <div class="card-actions">
-        <a href="${f.file_url}" target="_blank" class="btn btn-ghost">👁 Открыть</a>
-        <a href="${f.file_url}" download="${esc(f.file_name)}" class="btn btn-ghost">⬇ Скачать</a>
-        ${mine ? `<button class="btn btn-danger" style="flex:0;padding:8px 12px" onclick="del('${f.id}','${esc(f.storage_path||'')}','${esc(f.file_name)}')">🗑</button>` : ''}
-      </div>
+      ${commentHtml}
     </div>`;
   }).join('');
 }
 
-// ── Статистика ────────────────────────────────────────────────
-function updateStats() {
-  document.getElementById('stat-total').textContent = allFiles.length;
-  document.getElementById('stat-users').textContent = new Set(allFiles.map(f=>f.user_id)).size;
-  document.getElementById('stat-mine').textContent  = allFiles.filter(f=>f.user_id===me.id).length;
-  document.getElementById('stat-size').textContent  = fmtSize(allFiles.reduce((s,f)=>s+(f.file_size||0),0));
+function updateUserStats(files) {
+  document.getElementById('us-total').textContent    = files.length;
+  document.getElementById('us-pending').textContent  = files.filter(f=>!f.status||f.status==='pending').length;
+  document.getElementById('us-accepted').textContent = files.filter(f=>f.status==='accepted').length;
 }
 
-// ── Загрузка файла ────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  ЗАГРУЗКА ФАЙЛА
+// ══════════════════════════════════════════════════════════════
 function setupUpload() {
   const zone = document.getElementById('drop-zone');
   const inp  = document.getElementById('file-input');
   zone.addEventListener('dragover',  e=>{e.preventDefault();zone.classList.add('over')});
   zone.addEventListener('dragleave', ()=>zone.classList.remove('over'));
-  zone.addEventListener('drop', e=>{e.preventDefault();zone.classList.remove('over');[...e.dataTransfer.files].forEach(upload)});
-  inp.addEventListener('change', ()=>{[...inp.files].forEach(upload);inp.value='';});
+  zone.addEventListener('drop', e=>{e.preventDefault();zone.classList.remove('over');[...e.dataTransfer.files].forEach(uploadFile)});
+  inp.addEventListener('change', ()=>{[...inp.files].forEach(uploadFile);inp.value='';});
 }
 
-async function upload(file) {
+async function uploadFile(file) {
   const ok = ['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document','image/jpeg','image/png'];
-  if (!ok.includes(file.type)) return toast('Разрешены: PDF, DOCX, JPG, PNG','err');
-  if (file.size > 50*1024*1024) return toast('Файл больше 50 МБ','err');
+  if (!ok.includes(file.type)) return toast('Разрешены: PDF, DOCX, JPG, PNG', 'err');
+  if (file.size > 50*1024*1024) return toast('Файл больше 50 МБ', 'err');
 
-  const panel=document.getElementById('prog-panel'),bar=document.getElementById('prog-bar'),pct=document.getElementById('prog-pct');
-  document.getElementById('prog-name').textContent=file.name;
+  const panel=document.getElementById('prog-panel');
+  const bar=document.getElementById('prog-bar');
+  const pct=document.getElementById('prog-pct');
+  document.getElementById('prog-name').textContent = file.name;
   setP(0); panel.classList.add('show');
 
   try {
-    const ext=file.name.split('.').pop();
-    const path=`${me.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const ext  = file.name.split('.').pop();
+    const path = `${me.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
     setP(20);
-    const {error:e1}=await sb.storage.from('files').upload(path,file,{contentType:file.type});
-    if(e1) throw e1;
+    const { error: e1 } = await sb.storage.from('files').upload(path, file, { contentType: file.type });
+    if (e1) throw e1;
     setP(65);
-    const {data:u}=sb.storage.from('files').getPublicUrl(path);
-    const {error:e2}=await sb.from('files').insert({
-      user_id:me.id, file_name:file.name, file_url:u.publicUrl,
-      file_size:file.size, file_type:file.type, storage_path:path,
-      uploader_name: me.user_metadata?.full_name || me.email,
-      uploader_email: me.email
+    const { data: u } = sb.storage.from('files').getPublicUrl(path);
+    const { error: e2 } = await sb.from('files').insert({
+      user_id:        me.id,
+      file_name:      file.name,
+      file_url:       u.publicUrl,
+      file_size:      file.size,
+      file_type:      file.type,
+      storage_path:   path,
+      uploader_name:  me.user_metadata?.full_name || me.email,
+      uploader_email: me.email,
+      status:         'pending',
+      admin_comment:  null
     });
-    if(e2) throw e2;
+    if (e2) throw e2;
     setP(100);
-    toast(`✅ "${file.name}" загружен!`,'ok');
-    await loadFiles();
+    toast(`✅ "${file.name}" загружен!`, 'ok');
+    await loadUserFiles();
   } catch(e) {
-    toast('Ошибка: '+e.message,'err');
+    toast('Ошибка: ' + e.message, 'err');
   } finally {
-    setTimeout(()=>{panel.classList.remove('show');setP(0);},1200);
+    setTimeout(()=>{ panel.classList.remove('show'); setP(0); }, 1200);
   }
-  function setP(p){bar.style.width=p+'%';pct.textContent=p+'%'}
+  function setP(p){ bar.style.width=p+'%'; pct.textContent=p+'%'; }
 }
 
-// ── Удаление ──────────────────────────────────────────────────
-async function del(id, path, name) {
-  if (!confirm(`Удалить "${name}"?`)) return;
+async function deleteUserFile(id, path) {
+  if (!confirm('Удалить этот файл?')) return;
   try {
     if (path) await sb.storage.from('files').remove([path]);
-    const {error}=await sb.from('files').delete().eq('id',id);
-    if(error) throw error;
-    toast('Файл удалён','inf');
-    await loadFiles();
-  } catch(e) { toast('Ошибка: '+e.message,'err'); }
+    const { error } = await sb.from('files').delete().eq('id', id);
+    if (error) throw error;
+    toast('Файл удалён', 'inf');
+    await loadUserFiles();
+  } catch(e) { toast('Ошибка: ' + e.message, 'err'); }
 }
 
-// ── Поиск и фильтры ───────────────────────────────────────────
-function setupSearch() {
-  document.getElementById('search').addEventListener('input', e=>{q=e.target.value.toLowerCase();applyFilters();});
+// Выход пользователя
+document.getElementById('u-logout').addEventListener('click', async () => {
+  await sb.auth.signOut(); me = null;
+  document.getElementById('user-page').classList.add('hidden');
+  document.getElementById('auth-page').classList.remove('hidden');
+});
+
+// ══════════════════════════════════════════════════════════════
+//  ADMIN — ДАШБОРД
+// ══════════════════════════════════════════════════════════════
+function showAdmin() {
+  document.getElementById('auth-page').classList.add('hidden');
+  document.getElementById('admin-page').classList.remove('hidden');
+  loadAdminData();
+  setupAdminTabs();
+  setupAdminSearch();
+  document.getElementById('export-btn').addEventListener('click', exportCSV);
 }
-function setupFilters() {
-  document.querySelectorAll('.ftab').forEach(t=>{
-    t.addEventListener('click',()=>{
-      document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
-      t.classList.add('active'); activeF=t.dataset.f; applyFilters();
+
+async function loadAdminData() {
+  try {
+    // Загружаем ВСЕ файлы (включая данные пользователей)
+    const { data: files, error: fe } = await sb.from('files').select('*').order('created_at', { ascending: false });
+    if (fe) throw fe;
+    allFilesAdmin = files || [];
+
+    // Уникальные участники из файлов + из auth (через uploader_email)
+    const usersMap = {};
+    allFilesAdmin.forEach(f => {
+      if (!usersMap[f.user_id]) {
+        usersMap[f.user_id] = {
+          id: f.user_id,
+          name: f.uploader_name || f.uploader_email || 'Участник',
+          email: f.uploader_email || '—',
+          files: [],
+        };
+      }
+      usersMap[f.user_id].files.push(f);
+    });
+    allUsersAdmin = Object.values(usersMap);
+
+    updateAdminStats();
+    renderAdminFiles(allFilesAdmin);
+    renderParticipants(allUsersAdmin);
+
+    document.getElementById('ab-files').textContent = allFilesAdmin.length;
+    document.getElementById('ab-users').textContent = allUsersAdmin.length;
+  } catch(e) {
+    toast('Ошибка загрузки данных: ' + e.message, 'err');
+  }
+}
+
+function updateAdminStats() {
+  document.getElementById('a-stat-users').textContent    = allUsersAdmin.length;
+  document.getElementById('a-stat-files').textContent    = allFilesAdmin.length;
+  document.getElementById('a-stat-pending').textContent  = allFilesAdmin.filter(f=>!f.status||f.status==='pending').length;
+  document.getElementById('a-stat-accepted').textContent = allFilesAdmin.filter(f=>f.status==='accepted').length;
+}
+
+// ── Рендер файлов (админ) ─────────────────────────────────────
+function renderAdminFiles(files) {
+  const list = document.getElementById('admin-files-list');
+  if (!files.length) {
+    list.innerHTML = `<div class="empty-state"><span class="ei">📭</span><h3>Файлов нет</h3><p>Участники ещё ничего не загрузили</p></div>`;
+    return;
+  }
+  list.innerHTML = files.map((f, i) => {
+    const color = aColor(f.user_id);
+    const author = f.uploader_name || f.uploader_email || 'Участник';
+    const status = f.status || 'pending';
+    return `
+    <div class="admin-file-card" style="animation-delay:${i*.04}s">
+      <div class="afc-top">
+        <div class="afc-ico ${icoClass(f.file_type)}">${icoEmoji(f.file_type)}</div>
+        <div class="afc-info" style="flex:1;min-width:0">
+          <div class="afc-name">${esc(f.file_name)}</div>
+          <div class="afc-meta">${fmtSize(f.file_size)} · ${fmtDate(f.created_at)} · ${statusHtml(status)}</div>
+          <div class="afc-author">
+            <div class="afc-author-av" style="background:${color}">${author[0].toUpperCase()}</div>
+            <span class="afc-author-name">${esc(author)}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <a href="${f.file_url}" target="_blank" class="btn btn-ghost btn-sm">👁 Открыть</a>
+          <a href="${f.file_url}" download="${esc(f.file_name)}" class="btn btn-ghost btn-sm">⬇</a>
+        </div>
+      </div>
+      <div class="afc-controls">
+        <select class="afc-status-sel" id="sel-${f.id}" onchange="updateStatus('${f.id}', this.value)">
+          <option value="pending"  ${status==='pending'  ?'selected':''}>⏳ На рассмотрении</option>
+          <option value="accepted" ${status==='accepted' ?'selected':''}>✅ Принято</option>
+          <option value="rejected" ${status==='rejected' ?'selected':''}>❌ Отклонено</option>
+        </select>
+        <input class="afc-comment-inp" id="cmt-${f.id}" placeholder="Комментарий участнику (необязательно)..." value="${esc(f.admin_comment||'')}">
+        <button class="btn btn-green btn-sm" onclick="saveComment('${f.id}')">💾 Сохранить</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Изменить статус ────────────────────────────────────────────
+async function updateStatus(fileId, status) {
+  try {
+    const { error } = await sb.from('files').update({ status }).eq('id', fileId);
+    if (error) throw error;
+    toast('Статус обновлён', 'ok');
+    // Обновляем локально
+    const f = allFilesAdmin.find(x=>x.id===fileId);
+    if (f) f.status = status;
+    updateAdminStats();
+  } catch(e) { toast('Ошибка: ' + e.message, 'err'); }
+}
+
+// ── Сохранить комментарий ──────────────────────────────────────
+async function saveComment(fileId) {
+  const comment = document.getElementById(`cmt-${fileId}`)?.value || '';
+  try {
+    const { error } = await sb.from('files').update({ admin_comment: comment }).eq('id', fileId);
+    if (error) throw error;
+    const f = allFilesAdmin.find(x=>x.id===fileId);
+    if (f) f.admin_comment = comment;
+    toast('Комментарий сохранён', 'ok');
+  } catch(e) { toast('Ошибка: ' + e.message, 'err'); }
+}
+
+// ── Рендер участников ──────────────────────────────────────────
+function renderParticipants(users) {
+  const list = document.getElementById('participants-list');
+  if (!users.length) {
+    list.innerHTML = `<div style="padding:40px;text-align:center;color:var(--soft)">Участников пока нет</div>`;
+    return;
+  }
+  list.innerHTML = users.map((u, i) => {
+    const color    = aColor(u.id);
+    const accepted = u.files.filter(f=>f.status==='accepted').length;
+    const hasPending = u.files.some(f=>!f.status||f.status==='pending');
+    const statusTxt = accepted > 0
+      ? `<span class="badge badge-accepted">✅ ${accepted} принято</span>`
+      : hasPending
+      ? `<span class="badge badge-pending">⏳ Ожидает</span>`
+      : `<span class="badge badge-rejected">❌ Отклонено</span>`;
+    return `
+    <div class="pt-row" style="animation-delay:${i*.04}s">
+      <div class="pt-cell">
+        <div class="participant-avatar" style="background:${color}">${u.name[0].toUpperCase()}</div>
+        <div>
+          <div class="participant-name">${esc(u.name)}</div>
+          <div class="participant-email">${esc(u.email)}</div>
+        </div>
+      </div>
+      <div class="pt-cell">${esc(u.email)}</div>
+      <div class="pt-cell"><strong>${u.files.length}</strong></div>
+      <div class="pt-cell"><strong style="color:var(--green)">${accepted}</strong></div>
+      <div class="pt-cell">${statusTxt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Табы администратора ────────────────────────────────────────
+function setupAdminTabs() {
+  document.querySelectorAll('.atab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const t = tab.dataset.tab;
+      document.getElementById('admin-tab-files').classList.toggle('hidden', t!=='files');
+      document.getElementById('admin-tab-users').classList.toggle('hidden', t!=='users');
     });
   });
 }
 
-// ── Выход ─────────────────────────────────────────────────────
-document.getElementById('logout-btn').addEventListener('click', async()=>{
-  await sb.auth.signOut(); me=null; allFiles=[];
-  document.getElementById('dash-page').classList.add('hidden');
+// ── Поиск (админ) ──────────────────────────────────────────────
+function setupAdminSearch() {
+  document.getElementById('a-search-files').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const st = document.getElementById('a-filter-status').value;
+    filterAdminFiles(q, st);
+  });
+  document.getElementById('a-filter-status').addEventListener('change', e => {
+    const q = document.getElementById('a-search-files').value.toLowerCase();
+    filterAdminFiles(q, e.target.value);
+  });
+  document.getElementById('a-search-users').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const filtered = allUsersAdmin.filter(u =>
+      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    );
+    renderParticipants(filtered);
+  });
+}
+
+function filterAdminFiles(q, status) {
+  let list = allFilesAdmin;
+  if (status !== 'all') list = list.filter(f=>(f.status||'pending')===status);
+  if (q) list = list.filter(f =>
+    f.file_name.toLowerCase().includes(q) ||
+    (f.uploader_name||'').toLowerCase().includes(q) ||
+    (f.uploader_email||'').toLowerCase().includes(q)
+  );
+  renderAdminFiles(list);
+}
+
+// ── Экспорт CSV ────────────────────────────────────────────────
+function exportCSV() {
+  const rows = [['Имя участника','Email','Файлов загружено','Принято','Отклонено','На рассмотрении']];
+  allUsersAdmin.forEach(u => {
+    const accepted = u.files.filter(f=>f.status==='accepted').length;
+    const rejected = u.files.filter(f=>f.status==='rejected').length;
+    const pending  = u.files.filter(f=>!f.status||f.status==='pending').length;
+    rows.push([u.name, u.email, u.files.length, accepted, rejected, pending]);
+  });
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `участники_${new Date().toLocaleDateString('ru-RU')}.csv`;
+  a.click();
+  toast('CSV скачан!', 'ok');
+}
+
+// Выход администратора
+document.getElementById('a-logout').addEventListener('click', async () => {
+  await sb.auth.signOut(); me = null;
+  document.getElementById('admin-page').classList.add('hidden');
   document.getElementById('auth-page').classList.remove('hidden');
 });
 
-// ── Утилиты ───────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+//  УТИЛИТЫ
+// ══════════════════════════════════════════════════════════════
+function statusHtml(s) {
+  if (s==='accepted') return `<span class="badge badge-accepted">✅ Принято</span>`;
+  if (s==='rejected') return `<span class="badge badge-rejected">❌ Отклонено</span>`;
+  return `<span class="badge badge-pending">⏳ На рассмотрении</span>`;
+}
 function toast(msg,type='inf'){const c=document.getElementById('toasts'),t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),3500)}
 function showErr(m){const e=document.getElementById('msg-err');e.textContent=m;e.classList.add('show');document.getElementById('msg-ok').classList.remove('show')}
 function showOk(m){const e=document.getElementById('msg-ok');e.textContent=m;e.classList.add('show');document.getElementById('msg-err').classList.remove('show')}
